@@ -1,0 +1,17 @@
+import pygame
+
+def check_collision(player_bullets, enemies, score):
+    """ 
+    this checks for collisions between player bullets and enemies
+     it also increases the score when an enemy is hit
+     """
+    
+    # Check for collision between bullets and enemies
+    collisions = pygame.sprite.groupcollide(player_bullets, 
+                                            enemies, True, True)
+
+    #Increases score by 10 for each enemy destroyed
+    for enemy_list in collisions.value():
+        score += len(enemy_list) * 10
+       
+    return score
