@@ -19,7 +19,7 @@ clock = pygame.time.Clock()
 player = pygame.Rect(375, 530, 50, 30)
 player_speed = 8
 
-player_image = pygame.image.load("Space_invaders.character.png")
+player_image = pygame.image.load("images/Space_invaders.character.png")
 player_image = pygame.transform.scale(player_image, (50, 30))
 
 # Player bullets
