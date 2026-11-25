@@ -47,24 +47,37 @@ alien_images = [
 
 enemies = []
 enemy_bullets = []
+# WAVE SETTINGS
+wave = 1
+speed_multiplier = 1.0
 
-# Create 35 enemies
-for row in range(5):
-    for col in range(7):
-        x = 190 + col * 60
-        y = 40 + row * 50
+# CREATE ENEMY FORMATION
+def create_enemies(speed_multiplier):
 
-        image = alien_images[row % len(alien_images)]
+    new_enemies = []
 
-        enemy = Enemy(x, y, image)
-        enemies.append(enemy)
+    for row in range(5):
+        for col in range(7):
 
-# Enemy movement
-direction = 1
+            x = 190 + col * 60
+            y = 40 + row * 50
+
+            image = alien_images[row % len(alien_images)]
+
+            enemy = Enemy(x, y, image, speed_multiplier)
+            new_enemies.append(enemy)
+
+    return new_enemies
+
+
+# Create first wave
+enemies = create_enemies(speed_multiplier)
+
+
 
 # Enemy shooting
 last_shot_time = pygame.time.get_ticks()
-shot_delay = 1200
+shot_delay = 800
 
 # -------------------------
 # MAIN GAME LOOP
@@ -125,37 +138,41 @@ while running:
     # Draw player
     screen.blit(player_image, player)
 
+    
     # -------------------------
     # ENEMY MOVEMENT
     # -------------------------
 
     for enemy in enemies:
-        enemy.move(direction)
-
-    hit_edge = (
-        (direction == 1 and any(
-            enemy.rect.right >= 800 for enemy in enemies
-        ))
-        or
-        (direction == -1 and any(
-            enemy.rect.left <= 0 for enemy in enemies
-        ))
-    )
-
-    if hit_edge:
-        direction *= -1
-
-        for enemy in enemies:
-            enemy.y += 20
-            enemy.rect.y = enemy.y
+        enemy.move()
 
     # Draw enemies
     for enemy in enemies:
         enemy.draw(screen)
+    # CHECK IF WAVE IS COMPLETED
 
-    # -------------------------
+    if len(enemies) == 0:
+
+        wave += 1
+
+        speed_multiplier += 0.2
+
+        enemies = create_enemies(speed_multiplier)
+
+        enemy_bullets.clear()
+    # PLAYER BULLET - ENEMY COLLISION
+
+    for bullet in bullets[:]:
+        for enemy in enemies[:]:
+
+            if bullet.colliderect(enemy.rect):
+
+                bullets.remove(bullet)
+                enemies.remove(enemy)
+
+                break
+
     # ENEMY SHOOTING
-    # -------------------------
 
     if enemies and current_time - last_shot_time >= shot_delay:
 
@@ -167,19 +184,15 @@ while running:
         )
 
         enemy_bullets.append(bullet)
-
         last_shot_time = current_time
 
-    # -------------------------
     # ENEMY BULLET MOVEMENT
-    # -------------------------
 
     for bullet in enemy_bullets[:]:
 
         bullet.move()
         bullet.draw(screen)
 
-        # Check collision with player
         if bullet.rect.colliderect(player):
 
             enemy_bullets.remove(bullet)
@@ -188,7 +201,6 @@ while running:
 
                 lives -= 1
                 last_player_hit = current_time
-
                 player.x = 375
 
                 if lives <= 0:
@@ -197,9 +209,8 @@ while running:
         elif bullet.rect.top > 600:
             enemy_bullets.remove(bullet)
 
-    # -------------------------
+    
     # DISPLAY PLAYER LIVES
-    # -------------------------
 
     lives_text = font.render(
         f"Lives: {lives}", True, (255, 255, 255)
@@ -207,10 +218,17 @@ while running:
 
     screen.blit(lives_text, (20, 15))
 
-    # Update display
-    pygame.display.flip()
+    # DISPLAY WAVE NUMBER
 
+    wave_text = font.render(
+        f"Wave: {wave}", True, (255, 255, 255)
+    )
+
+    screen.blit(wave_text, (650, 15))
+
+    pygame.display.flip()
     clock.tick(60)
+
 
 pygame.quit()
 

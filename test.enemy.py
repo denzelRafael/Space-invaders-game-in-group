@@ -11,7 +11,7 @@ alien_images = [
     pygame.image.load("images/alien 3 transparent.png")
 ]
 
-screen = pygame.display.set_mode((500, 500))
+screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Enemy Test")
 
 enemies = []
@@ -31,12 +31,6 @@ for row in range(5):
         enemies.append(enemy)
 
 running = True
-direction = 1
-clock = pygame.time.Clock()
-
-
-running = True
-direction = 1
 clock = pygame.time.Clock()
 
 while running:
@@ -46,23 +40,9 @@ while running:
 
     screen.fill((0, 0, 0))
 
-    # Move all enemies
-    for enemy in enemies:
-        enemy.move(direction)
-
-    # Check if any enemy reaches the edge
-    hit_edge = (
-        (direction == 1 and any(enemy.rect.right >= 500 for enemy in enemies))
-        or
-        (direction == -1 and any(enemy.rect.left <= 0 for enemy in enemies))
-    )
-
-    if hit_edge:
-        direction *= -1
-
-        for enemy in enemies:
-            enemy.y += 20
-            enemy.rect.y = enemy.y
+   # Move all enemies independently
+for enemy in enemies:
+    enemy.move()
 
     # Enemy shooting
     current_time = pygame.time.get_ticks()
