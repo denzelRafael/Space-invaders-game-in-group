@@ -15,6 +15,11 @@ player_x = 375
 
 #Bullet settings
 bullets = []
+walls = [
+    pygame.Rect(120, 430 ,80 ,30),
+    pygame.Rect(360, 430, 80, 30),
+    pygame.Rect(600, 430, 80, 30)
+]
 bullet_speed = 8
 shoot_delay = 700
 last_shot = pygame.time.get_ticks() 
@@ -28,32 +33,45 @@ while running:
 
     screen.fill((0, 0, 0,))
 
+    for wall in walls:
+    pygame.draw.rect(screen, (0, 255, 0), wall)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             
     keys = pygame.key.get_pressed()
 
+
  #Shooting bullets (player and enemies)
-    current_time = pygame.time.get_ticks()
     if keys[pygame.K_SPACE] and current_time - last_shot > shoot_delay:
-         bullet = pygame.Rect(player.centerx - 2, player.top, 5, 10)
-         bullets.append(bullet)
-         last_shot = current_time
+        
+        bullets.append(Bullet(player.centerx - 2, player.top, -8))
+        last_shot = current_time
+
+    if enemies and current_time - last_shot_time >= shoot_delay:
+
+        shooter = random.choice(enemies)
+
+        bullets.append(Bullet(shooter.centerx - 2, shooter.bottom, 5))
 
 
     # Move bullets and draw them
     for bullet in bullets[:]:
-
         bullet.move()
         bullet.draw(screen)
+
+        for wall in walls:
+            if bullet.rect.colliderect(wall):
+                bullets.remove(bullet)
+                break
     
         if bullet.speed < 0 and bullet.rect.bottom < 0:
             bullets.remove(bullet)
 
         elif bullet.speed > 0 and bullet.rect.top > 600:
             bullets.remove(bullet)
-            
+
     
     # Player movement
     if keys[pygame.K_LEFT]:
